@@ -269,6 +269,16 @@ Importing Models
 <QuerySet [<Tag: python>, <Tag: django>]>
 ```
 
+#### Removing Associations
+
+```python
+>>> # remove a Tag from an Article
+>>> article.tags.remove(tag)
+>>> 
+>>> # remove an Article from a Tag
+>>> tag.article_set.remove(article)
+```
+
 ## Tests
 
 ### Status code
