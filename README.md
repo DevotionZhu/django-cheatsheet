@@ -99,6 +99,12 @@ class Tag(models.Model):
 'django'
 ```
 
+#### Delete an Object
+
+```python
+tag.delete()
+```
+
 ### Model Manager
 
 You can access it via the Python attribute `objects`.
@@ -156,6 +162,111 @@ python
 >>> tag = Tag.objects.get(id=1)
 >>> tag.tag_name
 'django'
+```
+
+#### objects.filter
+
+```python
+>>> Tag.objects.filter(id=1)
+<QuerySet [<Tag: python>]>
+```
+
+### Many-to-many Relationship
+
+An Article has multiple Tags objects, and a Tag can be used in multiple Articles.
+
+#### Example Setup
+
+```python
+class Tag(models.Model):
+    tag_name = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.tag_name
+        
+class Article(models.Model):
+    title = models.CharField(max_length=120, unique=True)
+    tags = models.ManyToManyField(Tag)  # Asociation Table with Tag Model
+
+    def __str__(self):
+        return self.title
+```
+
+Importing Models
+
+```python
+>>> from models import Article, Tag
+>>> tag_1 = Tag.objects.create(tag_name="python")
+>>> tag_2 = Tag.objects.create(tag_name="django")
+>>> article = Article.objects.create(title="My Article")
+```
+
+#### Associating Articles and Tags 
+
+```python
+>>> # add a Tag to an Article
+>>> article.tags.add(tag_1)
+>>> article.tags.add(tag_2)
+>>> # or article.tags.add(tag_1, tag_2)
+
+>>> # add an Article to a Tag
+>>> tag = Tag(tag_name="flask")
+>>> tag.save()
+>>> tag.article_set.add(article)
+```
+
+#### Accesing Association Objects
+
+```python
+>>> article.tags.all()  # Tags in an Article
+<QuerySet [<Tag: python>, <Tag: django>]>
+>>>
+>>> tag_1.article_set.all()  # Articles that have a Tag
+<QuerySet [<Article: My Article>]>
+```
+
+#### Queries
+
+```python
+>>> Article.objects.filter(tags__id=1)
+<QuerySet [<Article: First Article>]>
+>>> Article.objects.filter(tags__pk=1)
+<QuerySet [<Article: First Article>]>
+>>> Article.objects.filter(tags=1)
+<QuerySet [<Article: First Article>]>
+
+>>> Article.objects.filter(tags__tag_name__startswith="django")
+<QuerySet [<Article: First Article>]>
+>>> Article.objects.filter(tags__tag_name__startswith="django").distinct()
+<QuerySet [<Article: First Article>]>
+>>> # distinct() eliminates duplicate rows from the query results.
+
+>>> Article.objects.filter(tags__tag_name__startswith="django").count()
+1
+
+>>> Article.objects.filter(tags__in=[1])
+<QuerySet [<Article: First Article>]>
+>>> Article.objects.filter(tags__in=[tag])
+<QuerySet [<Article: First Article>]>
+```
+
+#### Reverse Queries
+
+```python
+>>> Tag.objects.filter(article__id=1)
+<QuerySet [<Tag: python>, <Tag: django>]>
+>>> Tag.objects.filter(article__pk=1)
+<QuerySet [<Tag: python>, <Tag: django>]>
+>>> Tag.objects.filter(article=1)
+<QuerySet [<Tag: python>, <Tag: django>]>
+
+>>> Tag.objects.filter(article__title__startswith="My")
+<QuerySet [<Tag: django>, <Tag: python>]>
+
+>>> Tag.objects.filter(article__in=[1,2])
+<QuerySet [<Tag: python>, <Tag: django>]>
+>>> Tag.objects.filter(article__in=[article])
+<QuerySet [<Tag: python>, <Tag: django>]>
 ```
 
 ## Tests
