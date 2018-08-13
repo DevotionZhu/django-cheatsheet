@@ -8,6 +8,7 @@
 - python manage.py runserver
 - python manage.py shell
 - python manage.py test
+- python manage.py test --verbosity=2
 - python manage.py makemigrations
 - python manage.py migrate
 
